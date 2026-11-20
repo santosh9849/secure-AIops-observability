@@ -1,25 +1,36 @@
 ﻿import os
+from backend.services.ingestion import ingest_telemetry
 from contextlib import asynccontextmanager
 from datetime import datetime, timezone
-from typing import Any
 
 from fastapi import Depends, FastAPI, Header, HTTPException
 from fastapi.middleware.cors import CORSMiddleware
-from pydantic import BaseModel, Field
 
 from backend import database
+from backend.models.telemetry import Telemetry
 
-# Shared secret the collector must send. Override with an environment variable later.
+
+# Collector authentication
 API_KEY = os.getenv("COLLECTOR_API_KEY", "dev-key-change-me")
 
 
+# Database initialization
 @asynccontextmanager
 async def lifespan(app: FastAPI):
-    database.init_db()  # runs once when the server starts
+    database.init_db()
     yield
 
 
-app = FastAPI(title="SENTINEL X Backend", lifespan=lifespan)
+# FastAPI application
+app = FastAPI(
+    title="SENTINEL X Backend",
+    description="Secure AI-powered observability platform",
+    version="1.0.0",
+    lifespan=lifespan
+)
+
+
+# Frontend CORS configuration
 app.add_middleware(
     CORSMiddleware,
     allow_origins=[
@@ -32,51 +43,59 @@ app.add_middleware(
 )
 
 
-def verify_api_key(x_api_key: str | None = Header(default=None)):
-    """Reject any request without the correct X-API-Key header."""
+# Collector API key verification
+def verify_api_key(
+    x_api_key: str | None = Header(default=None)
+):
     if x_api_key != API_KEY:
-        raise HTTPException(status_code=401, detail="Invalid or missing API key")
+        raise HTTPException(
+            status_code=401,
+            detail="Invalid or missing API key"
+        )
 
 
-# ---- Data shapes (these mirror docs/api-contract.md) ----
-class Metrics(BaseModel):
-    cpu: float = Field(ge=0, le=100)
-    memory: float = Field(ge=0, le=100)
-    disk: float = Field(ge=0, le=100)
-    network_latency: float = Field(ge=0)  # milliseconds
+# -------------------------------
+# HEALTH CHECK
+# -------------------------------
 
-
-class Telemetry(BaseModel):
-    payload_id: str
-    collector_id: str
-    timestamp: datetime  # "2026-11-20T09:30:00Z" is parsed automatically
-    source_timezone: str
-    source_id: str
-    metrics: Metrics
-    health_status: str
-    events: list[dict[str, Any]] = []
-
-
-# ---- Endpoints ----
 @app.get("/health")
 def health():
-    return {"status": "ok"}
+    return {
+        "status": "ok",
+        "service": "SENTINEL X Backend"
+    }
 
 
-@app.post("/ingest", dependencies=[Depends(verify_api_key)])
+# -------------------------------
+# TELEMETRY INGESTION
+# -------------------------------
+
+@app.post(
+    "/ingest",
+    dependencies=[Depends(verify_api_key)]
+)
 def ingest(payload: Telemetry):
-    ts = payload.timestamp
-    if ts.tzinfo is None:                 # no timezone given -> assume UTC
-        ts = ts.replace(tzinfo=timezone.utc)
-    event_time = ts.astimezone(timezone.utc).isoformat()
 
+    timestamp = payload.timestamp
+
+    # Convert timestamp to UTC
+    if timestamp.tzinfo is None:
+        timestamp = timestamp.replace(tzinfo=timezone.utc)
+
+    event_time = timestamp.astimezone(
+        timezone.utc
+    ).isoformat()
+
+    # Store telemetry in SQLite
     inserted = database.insert_payload(
         {
             "payload_id": payload.payload_id,
             "collector_id": payload.collector_id,
             "source_id": payload.source_id,
             "event_time": event_time,
-            "received_at": datetime.now(timezone.utc).isoformat(),
+            "received_at": datetime.now(
+                timezone.utc
+            ).isoformat(),
             "source_timezone": payload.source_timezone,
             "cpu": payload.metrics.cpu,
             "memory": payload.metrics.memory,
@@ -86,20 +105,46 @@ def ingest(payload: Telemetry):
             "events": payload.events,
         }
     )
-    # A duplicate is NOT an error: the collector retried, we already have it.
-    return {"status": "accepted" if inserted else "duplicate",
-            "payload_id": payload.payload_id}
 
+    return {
+        "status": "accepted" if inserted else "duplicate",
+        "payload_id": payload.payload_id
+    }
+
+
+# -------------------------------
+# LATEST TELEMETRY
+# -------------------------------
 
 @app.get("/latest")
 def latest():
     return database.get_latest_per_source()
 
 
-@app.get("/history/{source_id}")
-def history(source_id: str, limit: int = 100):
-    return database.get_history(source_id, limit)
+# -------------------------------
+# TELEMETRY HISTORY
+# -------------------------------
 
+@app.get("/history/{source_id}")
+def history(
+    source_id: str,
+    limit: int = 100
+):
+    if limit < 1 or limit > 1000:
+        raise HTTPException(
+            status_code=400,
+            detail="Limit must be between 1 and 1000"
+        )
+
+    return database.get_history(
+        source_id,
+        limit
+    )
+
+
+# -------------------------------
+# COLLECTOR INFORMATION
+# -------------------------------
 
 @app.get("/collectors")
 def collectors():
