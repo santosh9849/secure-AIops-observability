@@ -1,0 +1,54 @@
+from typing import List
+from schemas.aiops_output import AnomalySignal
+
+
+class EventCorrelator:
+    def __init__(self, window_seconds: int = 90):
+        self.window_seconds = window_seconds
+
+    def correlate(self, anomalies: List[AnomalySignal]) -> List[List[AnomalySignal]]:
+        if not anomalies:
+            return []
+
+        # Deduplicate signals referencing the exact same event_id (keep highest score)
+        deduped_map = {}
+        for a in anomalies:
+            if a.event_id not in deduped_map or a.anomaly_score > deduped_map[a.event_id].anomaly_score:
+                deduped_map[a.event_id] = a
+
+        # Sort strictly by UTC event_timestamp_utc to guarantee out-of-order resilience
+        sorted_signals = sorted(deduped_map.values(), key=lambda x: x.event_timestamp_utc)
+
+        clusters: List[List[AnomalySignal]] = []
+        visited = set()
+
+        for i, anchor in enumerate(sorted_signals):
+            if i in visited:
+                continue
+
+            cluster = [anchor]
+            visited.add(i)
+
+            for j in range(i + 1, len(sorted_signals)):
+                if j in visited:
+                    continue
+
+                candidate = sorted_signals[j]
+                if candidate.tenant_id != anchor.tenant_id:
+                    continue
+
+                delta_sec = (candidate.event_timestamp_utc - anchor.event_timestamp_utc).total_seconds()
+                if delta_sec > self.window_seconds:
+                    break
+
+                # Group if same host OR cross-layer cascade (e.g., network/db spike -> app latency)
+                same_host = candidate.pseudonymous_host == anchor.pseudonymous_host
+                cross_domain_cascade = candidate.category != anchor.category
+
+                if same_host or cross_domain_cascade:
+                    cluster.append(candidate)
+                    visited.add(j)
+
+            clusters.append(cluster)
+
+        return clusters
