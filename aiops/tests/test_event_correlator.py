@@ -1,11 +1,17 @@
-
 from datetime import datetime, timezone, timedelta
 
 from correlation.event_correlator import EventCorrelator
 from schemas.aiops_output import AnomalySignal
 
 
-def create_anomaly(event_id, tenant, host, category, seconds, score=0.90):
+def create_anomaly(
+    event_id,
+    tenant,
+    host,
+    category,
+    seconds,
+    score=0.90,
+):
     return AnomalySignal(
         event_id=event_id,
         tenant_id=tenant,
@@ -18,7 +24,7 @@ def create_anomaly(event_id, tenant, host, category, seconds, score=0.90):
         ) + timedelta(seconds=seconds),
         detector_type="threshold",
         anomaly_score=score,
-        reason="Test anomaly"
+        reason="Test anomaly",
     )
 
 
@@ -75,6 +81,8 @@ def test_events_outside_time_window():
     result = correlator.correlate(anomalies)
 
     assert len(result) == 2
+
+
 def test_same_event_id_from_different_tenants_is_preserved():
     correlator = EventCorrelator()
 
