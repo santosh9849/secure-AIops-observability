@@ -1,12 +1,15 @@
 from datetime import datetime, timezone, timedelta
+
 from fastapi.testclient import TestClient
 from main import app
+
 
 client = TestClient(app)
 
 
 def test_health_endpoint():
     res = client.get("/health")
+
     assert res.status_code == 200
     assert res.json()["status"] == "healthy"
 
@@ -14,7 +17,7 @@ def test_health_endpoint():
 def test_correlated_incident_and_out_of_order_handling():
     base_time = datetime(2026, 11, 20, 10, 0, 0, tzinfo=timezone.utc)
 
-    # Intentionally send downstream latency event BEFORE upstream packet_loss event
+    # Intentionally send downstream latency before upstream packet loss
     payload = {
         "tenant_id": "tenant_eu_01",
         "region": "eu-central",
@@ -24,7 +27,9 @@ def test_correlated_incident_and_out_of_order_handling():
                 "tenant_id": "tenant_eu_01",
                 "region": "eu-central",
                 "collector_id": "col-1",
-                "event_timestamp_utc": (base_time + timedelta(seconds=15)).isoformat(),
+                "event_timestamp_utc": (
+                    base_time + timedelta(seconds=15)
+                ).isoformat(),
                 "pseudonymous_host": "node_a1b2c3",
                 "category": "application",
                 "metric_name": "latency_ms",
@@ -46,7 +51,9 @@ def test_correlated_incident_and_out_of_order_handling():
                 "tenant_id": "tenant_eu_01",
                 "region": "eu-central",
                 "collector_id": "col-1",
-                "event_timestamp_utc": (base_time + timedelta(seconds=20)).isoformat(),
+                "event_timestamp_utc": (
+                    base_time + timedelta(seconds=20)
+                ).isoformat(),
                 "pseudonymous_host": "node_a1b2c3",
                 "category": "security",
                 "metric_name": "failed_auth_count",
@@ -56,18 +63,22 @@ def test_correlated_incident_and_out_of_order_handling():
     }
 
     res = client.post("/analyze", json=payload)
+
     assert res.status_code == 200
     data = res.json()
 
     assert data["anomalies_detected"] == 3
     assert data["incidents_generated"] == 1
-    assert data["processing_time_ms"] < 2000  # Well under 15s SLA
+    assert data["processing_time_ms"] < 2000
 
     incident = data["incidents"][0]
+
     assert incident["severity"] == "CRITICAL"
     assert incident["correlated_event_count"] == 3
     assert incident["root_cause_metric"] == "failed_auth_count"
     assert len(incident["recommended_actions"]) >= 1
+
+
 def test_rejects_event_from_different_tenant():
     payload = {
         "tenant_id": "tenant_A",
@@ -91,4 +102,3 @@ def test_rejects_event_from_different_tenant():
     assert res.json()["detail"] == (
         "All telemetry events must belong to the request tenant."
     )
-    

@@ -1,357 +1,296 @@
 # SentinelOps AI
 
-### Secure AI-Powered Observability Platform
+**Secure AI-powered infrastructure observability prototype**  
+**CICADA 2026 | Atria Institute of Technology**
 
-**CICADA 2026 – 24-Hour Hackathon**
+SentinelOps AI is a local-first observability prototype. A Python collector gathers host and network metrics, a FastAPI backend authenticates collector submissions and stores approved telemetry in SQLite, and a separate AIOps service detects anomalies, correlates related signals, and produces incident recommendations.
 
-A secure, AI-powered observability platform that monitors enterprise infrastructure, applications, networks and security events while keeping sensitive operational data inside the customer's environment.
+A React dashboard presents telemetry, infrastructure health, incidents, AI insights, network information, and egress audit records.
 
----
+> **Prototype scope:** The current hackathon implementation runs locally on one machine using separate collector, backend, AIOps, and frontend processes. It demonstrates the intended two-tier design, but it is **not yet a cloud-deployed SaaS product**. Dashboard-user authentication, HTTPS/TLS deployment, and production-grade tenant authorization are not implemented.
 
-## 1. Problem Statement
+## 1. Problem and Solution
 
-Organizations need to monitor distributed infrastructure, applications, networks and security events without exposing sensitive operational data outside their environments.
+Organizations need visibility into infrastructure health while limiting the operational data that leaves their environment.
 
-Traditional monitoring approaches can create security risks when raw logs, credentials, payloads and detailed telemetry are transferred to centralized platforms. Organizations also struggle with alert fatigue, operational blind spots and identifying the root causes of system failures.
+Traditional monitoring systems can transfer sensitive logs and detailed telemetry to centralized platforms. They may also generate excessive alerts, making it difficult to identify the actual causes of system failures.
 
-**Our Solution:**
+SentinelOps AI demonstrates a local collector and a central analytics layer:
 
-SentinelOps AI introduces a two-tier observability architecture consisting of a local collector and a centralized SaaS platform.
+- **Local collection:** Collect CPU, memory, disk, network throughput, latency, and packet-loss information.
+- **Backend ingestion:** Validate collector identity, accept telemetry, filter event metadata through an allow-list, and record egress audit information.
+- **AIOps analysis:** Apply threshold and statistical detection, Isolation Forest analysis, event correlation, root-cause analysis, severity classification, and recommendation generation.
+- **Dashboard:** Display live telemetry, infrastructure health, incidents, network data, AI insights, and audit information.
 
-The local collector gathers and processes telemetry, filters sensitive information, redacts secrets and sends only approved metadata to the centralized platform.
+## 2. Architecture
 
-The SaaS platform uses AIOps techniques to detect anomalies, correlate incidents and generate explainable operational recommendations.
+SentinelOps AI uses a two-tier architecture.
 
-## 2. Project Objectives
+```text
+Customer / Local Environment
+┌──────────────────────────────────────────────┐
+│ Python Collector (collector/agent.py)        │
+│ psutil metrics + network probe               │
+│ Local retry buffer on connection failure    │
+└──────────────────────┬───────────────────────┘
+                       │ X-API-Key + JSON telemetry
+                       ▼
+Central Ingestion / Analytics Layer (local prototype)
+┌──────────────────────────────────────────────┐
+│ FastAPI Backend :8000                        │
+│ Collector validation • Event allow-list      │
+│ SQLite telemetry/incidents/egress audit      │
+└──────────────────────┬───────────────────────┘
+                       │ POST /analyze
+                       ▼
+┌──────────────────────────────────────────────┐
+│ AIOps FastAPI Service :8001                  │
+│ Threshold + Statistical + Isolation Forest  │
+│ Correlation • Root cause • Severity          │
+│ Recommendations                              │
+└──────────────────────┬───────────────────────┘
+                       │ REST API
+                       ▼
+┌──────────────────────────────────────────────┐
+│ React + Vite Dashboard :5173                 │
+│ Dashboard • Infrastructure • Network         │
+│ Incidents • AI Insights • Audit • Settings   │
+└──────────────────────────────────────────────┘
+```
 
-- Protect sensitive operational data through local processing.
-- Monitor infrastructure, applications, networks and security events.
-- Detect anomalies using historical baselines and statistical techniques.
-- Reduce alert fatigue through event correlation.
-- Provide explainable recommendations for system administrators.
-- Support multiple collectors and customer environments.
-- Maintain reliable data delivery during network outages.
-- Provide a centralized real-time observability dashboard.
+### Data flow
 
-## 3. System Architecture
+`Collect → Validate → Filter approved event fields → Store → Analyze → Correlate → Recommend → Display`
 
-SentinelOps AI follows a two-tier architecture.
+The backend's event sanitizer reconstructs accepted event objects from approved fields rather than persisting arbitrary input properties. In the demonstrated filter test, an extra `client_email` property was not present in stored telemetry.
 
-### Tier 1: Local Collector (Customer Environment)
+## 3. Main Features Implemented
 
-Responsible for collecting and processing telemetry locally.
+- Host CPU, memory, disk, and network telemetry collection.
+- Network latency probe, bandwidth measurements, and packet-loss event support.
+- Four health labels: Excellent, Good, Fair, and Poor.
+- Collector API-key validation and registered-collector checks.
+- Event allow-list filtering and egress audit records.
+- SQLite persistence for telemetry, incidents, collectors, and audit information.
+- Duplicate-payload handling in ingestion.
+- Local collector retry/buffer logic for connection failures.
+- AIOps threshold, statistical, and Isolation Forest detection.
+- Event correlation, root-cause analysis, severity classification, and recommendations.
+- React dashboard pages for Dashboard, Infrastructure, Network, Security, Incidents, AI Insights, Audit Logs, and Settings.
 
-Responsibilities:
-- Collect CPU, memory and disk metrics.
-- Monitor network latency and packet loss.
-- Process application and security events.
-- Filter and normalize telemetry.
-- Redact sensitive information.
-- Apply metadata allow-list policies.
-- Perform local analysis.
-- Maintain an egress proof log.
-- Buffer approved metadata during SaaS outages.
+**Current collector scope:** The supplied collector gathers system and network metrics. It does not currently collect arbitrary raw application logs or implement a general-purpose secret-scanning pipeline. The security dashboard should therefore be interpreted in the context of the security-related records actually ingested.
 
-### Tier 2: Central SaaS Platform
+## 4. Technology Stack
 
-Responsible for centralized monitoring and intelligence.
-
-Responsibilities:
-- Receive approved metadata securely.
-- Authenticate collectors.
-- Enforce tenant-level data separation.
-- Store telemetry and incident records.
-- Detect anomalies.
-- Correlate related alerts.
-- Generate explainable recommendations.
-- Provide real-time dashboards and alerts.
-
-### Data Flow
-
-**Collect → Filter → Redact → Aggregate → Analyze Locally → Apply Data Policy → Transmit Metadata → SaaS Analytics → Dashboard and Recommendations**
-
-Raw logs, passwords, tokens and sensitive information remain local by default.
-
-## 4. Key Features
-
-| Feature | Description |
+| Layer | Technologies |
 |---|---|
-| Local Telemetry Collector | Collects infrastructure and network metrics |
-| Privacy Engine | Filters and redacts sensitive information |
-| Metadata-Only Transmission | Sends approved fields to SaaS |
-| Egress Proof Panel | Shows exactly what payload is transmitted |
-| Real-Time Dashboard | Displays infrastructure health |
-| Four Health States | Excellent, Good, Fair and Poor |
-| Anomaly Detection | Identifies unusual system behaviour |
-| Alert Correlation | Combines related alerts into incidents |
-| AI Recommendations | Suggests possible causes and solutions |
-| Local Buffering | Stores metadata during connectivity outages |
-| Multi-Tenant Support | Separates customer environments |
+| Collector | Python, psutil |
+| Backend API | Python, FastAPI, Pydantic |
+| AIOps Service | Python, FastAPI, NumPy, pandas, scikit-learn |
+| Database | SQLite |
+| Frontend | React, Vite, React Router, Axios, Recharts, lucide-react |
+| Testing | pytest |
+| Version Control | Git, GitHub |
 
-## 5. Technology Stack
-
-| Component | Technology |
-|---|---|
-| Frontend | React.js, Vite |
-| Backend | Node.js, Express.js |
-| Collector | Python |
-| Database | MongoDB |
-| Real-Time Communication | Socket.IO |
-| Analytics | Python, NumPy |
-| Authentication | JWT |
-| Local Buffering | SQLite |
-| Version Control | Git and GitHub |
-
-## 6. Repository Structure
+## 5. Repository Structure
 
 ```text
 secure-AIops-observability/
-│
-├── aiops/
-│   └── AIOps anomaly detection and recommendations
-│
-├── backend/
-│   └── Node.js APIs and MongoDB integration
-│
-├── collector/
-│   └── Python local telemetry collector
-│
-├── docs/
-│   └── Architecture and API documentation
-│
-├── frontend/
-│   └── React monitoring dashboard
-│
-├── tests/
-│   └── Integration and performance testing
-│
+├── aiops/          # AIOps API, detectors, correlation, recommendations and tests
+├── backend/        # FastAPI ingestion API, database, models and routes
+├── collector/      # Local Python telemetry collector
+├── docs/           # Project documentation
+├── frontend/       # React + Vite dashboard
+├── tests/          # Project-level tests, if present
+├── .gitignore
 ├── LICENSE
 └── README.md
 ```
 
-## 7. Team Responsibilities
+## 6. Local Setup (Windows PowerShell)
 
-The project is divided into four independent development modules.
+Run commands from the repository root unless a `cd` command is shown. The prototype uses separate Python environments for the backend/collector and AIOps service.
 
-### Member 1 – Local Collector Engineer
+### 6.1 Backend and Collector Environment
 
-**Git Branch:** `collector`
+```powershell
+py -m venv venv
+.\venv\Scripts\Activate.ps1
+python -m pip install --upgrade pip
+pip install -r backend\requirements.txt
+pip install -r collector\requirements.txt
+```
 
-**Working Directory:** `collector/`
+If PowerShell blocks environment activation, use the Python environment activation method already configured on your machine, or run the environment's `python.exe` directly.
 
-Responsibilities:
-- Develop the Python telemetry collector.
-- Collect CPU, memory and disk usage.
-- Monitor network latency and packet loss.
-- Process application and security logs.
-- Integrate simulated telemetry.
-- Implement local buffering and retry mechanisms.
-- Ensure telemetry is processed locally.
+### 6.2 AIOps Environment
 
-**Expected Deliverable:** A working Python collector that gathers and processes telemetry inside the customer environment.
+Open a separate PowerShell terminal:
 
-### Member 2 – Backend and Security Engineer
+```powershell
+cd aiops
+py -m venv .venv
+.\.venv\Scripts\Activate.ps1
+python -m pip install --upgrade pip
+pip install -r requirements.txt
+```
 
-**Git Branch:** `backend`
+### 6.3 Frontend Dependencies
 
-**Working Directory:** `backend/`
+Open another terminal:
 
-Responsibilities:
-- Develop Node.js and Express APIs.
-- Integrate MongoDB.
-- Implement user and collector authentication.
-- Implement tenant-level data isolation.
-- Validate incoming metadata against the allow-list.
-- Store telemetry and incident records.
-- Implement duplicate payload prevention.
-- Maintain egress audit records.
+```powershell
+cd frontend
+npm install
+```
 
-**Expected Deliverable:** A secure backend supporting metadata ingestion, authentication and multi-tenant storage.
+## 7. Start the Four Processes
 
-### Member 3 – Frontend Engineer
+Keep each process running in its own terminal. Start AIOps first, then the backend, the frontend, and finally the collector.
 
-**Git Branch:** `frontend`
+### Terminal 1 — AIOps Service
 
-**Working Directory:** `frontend/`
+```powershell
+cd aiops
+.\.venv\Scripts\Activate.ps1
+uvicorn main:app --host 127.0.0.1 --port 8001
+```
 
-Responsibilities:
-- Develop the React monitoring dashboard.
-- Display CPU, memory and disk usage.
-- Display network metrics.
-- Implement four system health states.
-- Display collector online/offline status.
-- Develop incidents and alerts pages.
-- Display egress proof information.
-- Integrate real-time updates.
+Health check: `http://127.0.0.1:8001/health`
 
-**Expected Deliverable:** A responsive monitoring dashboard displaying real telemetry, system health and incidents.
+### Terminal 2 — Backend Service
 
-### Member 4 – AIOps Engineer
+From the repository root:
 
-**Git Branch:** `aiops`
+```powershell
+.\venv\Scripts\Activate.ps1
+cd backend
+uvicorn main:app --host 127.0.0.1 --port 8000
+```
 
-**Working Directory:** `aiops/`
+Health check: `http://127.0.0.1:8000/health`  
+Interactive API docs: `http://127.0.0.1:8000/docs`
 
-Responsibilities:
-- Develop anomaly detection algorithms.
-- Establish historical metric baselines.
-- Implement statistical anomaly detection.
-- Develop event correlation.
-- Reduce duplicate and noisy alerts.
-- Generate explainable recommendations.
-- Display contributing signals and confidence scores.
-- Integrate AIOps results with the backend and dashboard.
+The SQLite database is managed by the backend and is created locally when the backend initializes.
 
-**Expected Deliverable:** An intelligent analytics engine capable of detecting anomalies, correlating incidents and recommending actions.
+### Terminal 3 — Frontend
 
-### Shared Responsibilities
+```powershell
+cd frontend
+npm run dev -- --host 127.0.0.1
+```
 
-All four members are responsible for:
-- Following secure coding practices.
-- Maintaining code documentation.
-- Testing their modules.
-- Participating in integration.
-- Reviewing pull requests.
-- Preparing the final demonstration.
+Open: `http://127.0.0.1:5173`
 
-## 8. GitHub Branch Strategy
+### Terminal 4 — Collector
 
-The project uses separate development branches to support parallel development.
+From the repository root, with the root `venv` activated:
 
-| Branch | Purpose |
-|---|---|
-| `main` | Stable integrated project |
-| `collector` | Python telemetry collector |
-| `backend` | Backend and security |
-| `frontend` | Monitoring dashboard |
-| `aiops` | Anomaly detection and recommendations |
+```powershell
+python collector/agent.py
+```
 
-### Collaboration Workflow
+The collector's current local-demo configuration targets the backend at `127.0.0.1:8000` and uses the registered demo collector configuration. Do not reuse development credentials for a public or production deployment.
 
-1. Each member works on their assigned branch.
-2. Pull the latest changes before starting development.
-3. Commit changes with meaningful messages.
-4. Push completed work to the respective branch.
-5. Create a Pull Request to merge changes into `main`.
-6. Review and test changes before merging.
-7. Keep `main` stable and functional.
+## 8. API Overview
 
-## 9. Data Privacy and Security
+### Backend (`http://127.0.0.1:8000`)
 
-### Data That Stays Local
+| Method | Endpoint | Purpose |
+|---|---|---|
+| GET | `/health` | Backend health check |
+| POST | `/ingest` | Receive authenticated collector telemetry (`X-API-Key`) |
+| GET | `/latest` | Latest telemetry records |
+| GET | `/history/{source_id}` | Telemetry history for a source |
+| GET | `/collectors` | Registered/recent collectors |
+| GET | `/incidents` | Retrieve incidents |
+| POST | `/incidents` | Create an incident record |
+| PATCH | `/incidents/{incident_id}` | Update incident status |
+| GET | `/audit-logs` | Retrieve egress audit records |
 
-- Raw application logs.
-- Passwords and authentication tokens.
-- API keys and secrets.
-- Personal information.
-- Sensitive request payloads.
+### AIOps (`http://127.0.0.1:8001`)
 
-### Data That Is Redacted
+| Method | Endpoint | Purpose |
+|---|---|---|
+| GET | `/health` | AIOps service health check |
+| POST | `/analyze` | Analyze a telemetry batch and return detection/correlation results |
 
-- Email addresses.
-- Credentials.
-- Sensitive identifiers.
-- Other policy-defined confidential fields.
+The backend and AIOps interactive API documentation are available at `/docs` on their respective ports when enabled by the FastAPI application.
 
-### Approved Metadata Sent to SaaS
+## 9. Event Allow-list
 
-- CPU usage.
-- Memory usage.
-- Disk usage.
-- Network latency.
-- Packet loss.
-- UTC timestamps.
-- Pseudonymous source identifiers.
-- Health states.
-- Event categories and severity.
-- Aggregated security indicators.
+The backend currently recognizes these event names:
 
-Only explicitly allow-listed fields are permitted to leave the local environment.
+| Event name | Expected unit | Accepted range |
+|---|---|---|
+| `bandwidth_upload_mbps` | Mbps | 0 or greater |
+| `bandwidth_download_mbps` | Mbps | 0 or greater |
+| `packet_loss` | % | 0–100 |
+| `network_probe_available` | Boolean | 0–1 |
 
-## 10. Four System Health States
+Each event uses `metric_name` and `metric_value`. The sanitizer builds a new approved event containing the allowed metric name/value, category, and unit; arbitrary extra properties are not carried into the stored event.
 
-| State | Meaning |
-|---|---|
-| Excellent | System is healthy and operating within expected baselines |
-| Good | Minor deviations without significant service impact |
-| Fair | System needs attention due to elevated metrics or warnings |
-| Poor | Critical condition, collector unavailable or severe degradation |
+Example event:
 
-Health thresholds will be configurable, and stale or missing data will be handled explicitly.
+```json
+{
+  "metric_name": "bandwidth_upload_mbps",
+  "metric_value": 2.5,
+  "category": "network",
+  "unit": "Mbps"
+}
+```
 
-## 11. AIOps Workflow
+## 10. Security and Prototype Limitations
 
-SentinelOps AI follows these stages:
+The following controls were exercised in the local prototype:
 
-1. **Observe:** Collect and visualize infrastructure metrics.
-2. **Detect:** Identify unusual behaviour and anomalies.
-3. **Correlate:** Group related events into incidents.
-4. **Recommend:** Suggest likely causes and corrective actions.
-5. **Act (Future):** Support approved and policy-controlled remediation.
+- Invalid collector API key returned **HTTP 401**.
+- Correct key with an unregistered collector returned **HTTP 403**.
+- Allow-listed event fields were accepted, and an extra test email property was not found in stored telemetry.
+- Egress audit records capture the approved field list and filtering decision/counts.
 
-Automated remediation will initially be simulated or restricted to a safe test environment.
+The following are **not yet production-ready or not implemented**:
 
-## 12. 24-Hour Development Plan
+- Dashboard login is a local demo entry, not real user authentication or authorization.
+- The prototype is bound to localhost for the documented demo; there is no production HTTPS/TLS termination or cloud deployment configuration.
+- Tenant-aware data structures exist, but complete authenticated tenant isolation across every dashboard/API route has not been established. The current dashboard uses the demo tenant context.
+- The current collector does not ingest arbitrary application logs or automatically discover all secret/PII patterns.
+- Performance targets and zero-loss/zero-duplicate behaviour during prolonged outages have not been comprehensively benchmarked.
+- Automated remediation is not implemented; recommendations are advisory and require human action.
 
-| Timeline | Activities |
-|---|---|
-| Hours 0–2 | Planning, architecture and team setup |
-| Hours 2–6 | Collector and privacy engine |
-| Hours 6–11 | Backend and dashboard development |
-| Hours 11–15 | Anomaly detection and correlation |
-| Hours 15–19 | Security, buffering and reliability |
-| Hours 19–22 | Integration and testing |
-| Hours 22–24 | Final demonstration and presentation |
+Use the supplied development configuration only for a local demonstration. Before any shared or public deployment, move credentials to environment-based secret management, rotate demo keys, add dashboard authentication/authorization, enforce tenant context, enable TLS, and review network exposure and database access.
 
-## 13. Performance Targets
+## 11. Verification Already Performed
 
-The prototype will be evaluated against the following suggested targets from the hackathon guide.
+The following results were observed during local development:
 
-| Measurement | Target |
-|---|---|
-| Collection to dashboard | Within 10 seconds at P95 |
-| Threshold breach to alert | Within 15 seconds |
-| Collector offline detection | Within 60 seconds |
-| Post-outage delivery | Zero loss and zero duplicates |
+- Frontend production build completed successfully with Vite. Vite emitted a non-blocking large-chunk warning.
+- AIOps unit tests: **31 passed** in the recorded test run.
+- Backend and AIOps health endpoints returned HTTP 200.
+- Collector telemetry successfully reached the backend and invoked the AIOps `/analyze` endpoint.
+- The invalid-key and unknown-collector tests returned HTTP 401 and HTTP 403 respectively.
+- The event-filter test accepted two approved events and did not persist the extra `client_email` property.
 
-Performance will be measured using event timestamps and payload identifiers.
+These are development verification results, not a formal security audit or production certification.
 
-## 14. Live Demonstration Scenarios
+## 12. Suggested 4-Minute Demonstration
 
-The final demonstration will cover:
+1. **Architecture (30 seconds):** Explain the local collector, ingestion backend, AIOps service, and React dashboard.
+2. **Live telemetry (45 seconds):** Show Dashboard and Infrastructure while the collector reports CPU, memory, disk, and network data.
+3. **Network monitoring (30 seconds):** Show latency, bandwidth, and packet-loss information.
+4. **AI incident analysis (60 seconds):** Open Incidents and AI Insights. Explain detection, event correlation, root-cause context, severity, and recommended actions.
+5. **Privacy/security (60 seconds):** Explain the event allow-list and egress audit. Show the recorded test results: wrong key → 401, unknown collector → 403, and the extra email property absent from stored telemetry.
+6. **Honest scope (15 seconds):** State that the current demonstrator is local, with dashboard authentication and cloud deployment as remaining production work.
 
-1. Raw log containing a secret: prove that sensitive content stays local.
-2. Collector loses SaaS connectivity: demonstrate buffering and retry.
-3. Repeated failed logins: generate a security risk indicator.
-4. Network latency rises: identify the affected source and severity.
-5. CPU or memory deviates from baseline: detect the anomaly and recommend investigation.
-6. Multiple alerts relate to one incident: demonstrate event correlation.
+## 13. Project Information
 
-## 15. Future Enhancements
-
-- Advanced machine learning anomaly detection.
-- Regional ingestion endpoints.
-- Advanced tenant data residency controls.
-- Global infrastructure monitoring.
-- Policy-controlled autonomous remediation.
-- Automated incident response with approval and rollback.
-
-## 16. Project Information
-
-**Project Name:** SentinelOps AI
-
-**Hackathon:** CICADA 2026
-
-**Event Duration:** 24 Hours
-
-**Organized By:** TechForcz × Atria Institute of Technology
-
-**Project Category:** Secure AIOps Observability
-
-**Development Team:** 4 Members
-
-**Repository:** https://github.com/santosh9849/secure-AIops-observability
+- **Project:** SentinelOps AI
+- **Event:** CICADA 2026 — 24-hour hackathon
+- **Institution:** Atria Institute of Technology
+- **Repository:** https://github.com/santosh9849/secure-AIops-observability
+- **Integration branch:** `integration`
 
 ---
 
-*SentinelOps AI – Observe Locally. Protect Data. Detect Intelligently. Recommend Confidently.*
+*SentinelOps AI — Observe locally. Protect data. Detect intelligently. Recommend responsibly.*

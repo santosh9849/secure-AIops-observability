@@ -1,4 +1,3 @@
-
 import time
 import uuid
 
@@ -22,7 +21,7 @@ app = FastAPI(
     title="Secure AIOps Engine",
     description=(
         "Real-time anomaly detection, correlation, root-cause "
-        "analysis & Autonomous Ops recommendations"
+        "analysis and operational recommendations"
     ),
     version="1.0.0",
 )
@@ -41,7 +40,7 @@ recommendation_engine = RecommendationEngine()
 def health_check():
     return {
         "status": "healthy",
-        "service": "aiops-engine"
+        "service": "aiops-engine",
     }
 
 
@@ -57,18 +56,19 @@ def analyze_telemetry(request: AnalyzeBatchRequest):
     ):
         raise HTTPException(
             status_code=400,
-            detail="All telemetry events must belong to the request tenant."
+            detail="All telemetry events must belong to the request tenant.",
         )
 
     # Optional baseline seeding from backend history
     for key, values in (request.historical_baseline or {}).items():
         if ":" in key:
             host, metric = key.split(":", 1)
+
             statistical_detector.seed_baseline(
                 request.tenant_id,
                 host,
                 metric,
-                values
+                values,
             )
 
     # 1. Run multi-model anomaly detection
@@ -98,7 +98,7 @@ def analyze_telemetry(request: AnalyzeBatchRequest):
 
         recommendations = recommendation_engine.recommend(
             rca["root_cause_metric"],
-            rca["root_cause_host"]
+            rca["root_cause_host"],
         )
 
         hosts = sorted({
@@ -144,14 +144,22 @@ def analyze_telemetry(request: AnalyzeBatchRequest):
         )
 
     # 4. Deduplicate anomalies using tenant ID and event ID
-    unique_anomalies = list({
-        (signal.tenant_id, signal.event_id): signal
-        for signal in raw_anomalies
-    }.values())
+    deduped_map = {}
+
+    for signal in raw_anomalies:
+        key = (signal.tenant_id, signal.event_id)
+
+        if (
+            key not in deduped_map
+            or signal.anomaly_score > deduped_map[key].anomaly_score
+        ):
+            deduped_map[key] = signal
+
+    unique_anomalies = list(deduped_map.values())
 
     elapsed_ms = round(
         (time.perf_counter() - start_time) * 1000,
-        2
+        2,
     )
 
     # 5. Return analysis response
@@ -171,7 +179,7 @@ if __name__ == "__main__":
 
     uvicorn.run(
         "main:app",
-        host="0.0.0.0",
+        host="127.0.0.1",
         port=8001,
-        reload=True
+        reload=True,
     )

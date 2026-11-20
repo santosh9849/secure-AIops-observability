@@ -10,8 +10,7 @@ class EventCorrelator:
         if not anomalies:
             return []
 
-
-                # Deduplicate by tenant and event ID
+        # Deduplicate by tenant and event ID
         deduped_map = {}
 
         for a in anomalies:
@@ -23,9 +22,12 @@ class EventCorrelator:
             ):
                 deduped_map[key] = a
 
-    
-        # Sort strictly by UTC event_timestamp_utc to guarantee out-of-order resilience
-        sorted_signals = sorted(deduped_map.values(), key=lambda x: x.event_timestamp_utc)
+        # Sort strictly by UTC event_timestamp_utc
+        # to guarantee out-of-order resilience
+        sorted_signals = sorted(
+            deduped_map.values(),
+            key=lambda x: x.event_timestamp_utc
+        )
 
         clusters: List[List[AnomalySignal]] = []
         visited = set()
@@ -42,16 +44,26 @@ class EventCorrelator:
                     continue
 
                 candidate = sorted_signals[j]
+
                 if candidate.tenant_id != anchor.tenant_id:
                     continue
 
-                delta_sec = (candidate.event_timestamp_utc - anchor.event_timestamp_utc).total_seconds()
+                delta_sec = (
+                    candidate.event_timestamp_utc
+                    - anchor.event_timestamp_utc
+                ).total_seconds()
+
                 if delta_sec > self.window_seconds:
                     break
 
-                # Group if same host OR cross-layer cascade (e.g., network/db spike -> app latency)
-                same_host = candidate.pseudonymous_host == anchor.pseudonymous_host
-                cross_domain_cascade = candidate.category != anchor.category
+                # Group if same host OR cross-domain cascade
+                same_host = (
+                    candidate.pseudonymous_host
+                    == anchor.pseudonymous_host
+                )
+                cross_domain_cascade = (
+                    candidate.category != anchor.category
+                )
 
                 if same_host or cross_domain_cascade:
                     cluster.append(candidate)
