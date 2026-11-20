@@ -1,13 +1,18 @@
 ﻿
 from contextlib import asynccontextmanager
-from backend.routes.incidents import router as incidents_router
 
-
-from fastapi import Depends, FastAPI, Header, HTTPException
+from fastapi import (
+    Depends,
+    FastAPI,
+    Header,
+    HTTPException,
+    Query,
+)
 from fastapi.middleware.cors import CORSMiddleware
 
 from backend import database
 from backend.models.telemetry import Telemetry
+from backend.routes.incidents import router as incidents_router
 from backend.services.ingestion import ingest_telemetry
 
 
@@ -31,7 +36,9 @@ app = FastAPI(
     version="1.0.0",
     lifespan=lifespan
 )
+
 app.include_router(incidents_router)
+
 
 # ---------------------------------
 # FRONTEND CORS
@@ -62,7 +69,9 @@ def get_current_collector(
             detail="Missing collector API key"
         )
 
-    collector = database.get_collector_by_api_key(x_api_key)
+    collector = database.get_collector_by_api_key(
+        x_api_key
+    )
 
     if not collector:
         raise HTTPException(
@@ -124,14 +133,12 @@ def latest():
 @app.get("/history/{source_id}")
 def history(
     source_id: str,
-    limit: int = 100
+    limit: int = Query(
+        default=100,
+        ge=1,
+        le=1000
+    )
 ):
-    if limit < 1 or limit > 1000:
-        raise HTTPException(
-            status_code=400,
-            detail="Limit must be between 1 and 1000"
-        )
-
     return database.get_history(
         source_id=source_id,
         limit=limit,
@@ -147,4 +154,22 @@ def history(
 def collectors():
     return database.get_collectors(
         tenant_id="demo"
+    )
+
+
+# ---------------------------------
+# AUDIT LOGS
+# ---------------------------------
+
+@app.get("/audit-logs")
+def audit_logs(
+    limit: int = Query(
+        default=100,
+        ge=1,
+        le=500
+    )
+):
+    return database.get_egress_audit(
+        tenant_id="demo",
+        limit=limit
     )

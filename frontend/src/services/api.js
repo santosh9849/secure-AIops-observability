@@ -1,7 +1,5 @@
-
 import axios from "axios";
 
-// FastAPI backend address
 const API_BASE_URL = "http://127.0.0.1:8000";
 
 const api = axios.create({
@@ -12,30 +10,83 @@ const api = axios.create({
   timeout: 10000,
 });
 
-// Check backend health
+
+// ---------------------------------
+// BACKEND HEALTH
+// ---------------------------------
+
 export const getHealth = async () => {
   const response = await api.get("/health");
   return response.data;
 };
 
-// Get latest telemetry
+
+// ---------------------------------
+// TELEMETRY
+// ---------------------------------
+
 export const getLatestTelemetry = async () => {
   const response = await api.get("/latest");
   return response.data;
 };
 
-// Get telemetry history
+
 export const getTelemetryHistory = async (sourceId) => {
   const response = await api.get(
     `/history/${encodeURIComponent(sourceId)}`
   );
+
   return response.data;
 };
 
-// Get registered collectors
+
+// ---------------------------------
+// COLLECTORS
+// ---------------------------------
+
 export const getCollectors = async () => {
   const response = await api.get("/collectors");
   return response.data;
 };
+
+
+// ---------------------------------
+// INCIDENT MANAGEMENT
+// ---------------------------------
+
+export const getIncidents = async (status) => {
+  const response = await api.get("/incidents", {
+    params: status ? { status } : {},
+  });
+
+  return response.data;
+};
+
+
+export const updateIncidentStatus = async (
+  incidentId,
+  status
+) => {
+  const response = await api.patch(
+    `/incidents/${encodeURIComponent(incidentId)}/status`,
+    { status }
+  );
+
+  return response.data;
+};
+
+
+// ---------------------------------
+// AUDIT LOGS
+// ---------------------------------
+
+export const getAuditLogs = async (limit = 100) => {
+  const response = await api.get("/audit-logs", {
+    params: { limit },
+  });
+
+  return response.data;
+};
+
 
 export default api;
