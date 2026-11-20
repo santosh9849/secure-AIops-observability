@@ -1,0 +1,23 @@
+# Python
+__pycache__/
+*.py[cod]
+*.db
+*.sqlite3
+.venv/
+venv/
+.env
+.env.*
+!.env.example
+.pytest_cache/
+
+# Node.js
+node_modules/
+dist/
+
+# Testing and coverage
+.coverage
+htmlcov/
+
+# Local runtime data and audit records
+backend/security_events.jsonl
+collector/data/

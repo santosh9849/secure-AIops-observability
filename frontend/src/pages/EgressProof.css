@@ -1,0 +1,523 @@
+
+.egress-page {
+  color: #e5eaf3;
+  width: 100%;
+  padding-bottom: 28px;
+}
+
+.egress-header {
+  display: flex;
+  justify-content: space-between;
+  align-items: flex-start;
+  gap: 20px;
+  margin-bottom: 20px;
+}
+
+.egress-eyebrow {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  color: #60a5fa;
+  font-size: 11px;
+  font-weight: 700;
+  letter-spacing: 1.2px;
+  margin-bottom: 10px;
+}
+
+.egress-header h1 {
+  font-size: 27px;
+  margin: 0 0 7px;
+  font-weight: 700;
+}
+
+.egress-header p {
+  color: #94a3b8;
+  font-size: 13px;
+  margin: 0;
+  line-height: 1.6;
+}
+
+.egress-refresh-button {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  border: 1px solid #334155;
+  color: #e2e8f0;
+  background: #172235;
+  border-radius: 8px;
+  padding: 10px 15px;
+  cursor: pointer;
+  font-weight: 600;
+  font-size: 13px;
+}
+
+.egress-refresh-button:hover {
+  background: #22334d;
+}
+
+.egress-refresh-button:disabled {
+  opacity: 0.65;
+  cursor: not-allowed;
+}
+
+.egress-spinning {
+  animation: egress-spin 1s linear infinite;
+}
+
+@keyframes egress-spin {
+  to {
+    transform: rotate(360deg);
+  }
+}
+
+.egress-connection {
+  display: flex;
+  align-items: center;
+  gap: 9px;
+  background: #111d2d;
+  border: 1px solid #26364c;
+  border-radius: 9px;
+  padding: 12px 15px;
+  color: #cbd5e1;
+  font-size: 12px;
+  margin-bottom: 18px;
+}
+
+.egress-connection-dot {
+  width: 8px;
+  height: 8px;
+  border-radius: 50%;
+  background: #f59e0b;
+  flex-shrink: 0;
+}
+
+.egress-connection-dot.connected {
+  background: #22c55e;
+  box-shadow: 0 0 9px #22c55e80;
+}
+
+.egress-updated {
+  color: #8493a9;
+  margin-left: auto;
+}
+
+.egress-notice {
+  display: flex;
+  gap: 12px;
+  padding: 14px;
+  margin-bottom: 18px;
+  border: 1px solid #765b2a;
+  background: #302719;
+  color: #fbbf24;
+  border-radius: 9px;
+}
+
+.egress-notice strong {
+  display: block;
+  font-size: 13px;
+  margin-bottom: 4px;
+}
+
+.egress-notice p,
+.egress-notice span {
+  display: block;
+  color: #e2c88d;
+  font-size: 12px;
+  margin: 3px 0 0;
+  line-height: 1.5;
+}
+
+.egress-stats {
+  display: grid;
+  grid-template-columns: repeat(4, minmax(0, 1fr));
+  gap: 14px;
+  margin-bottom: 18px;
+}
+
+.egress-stat-card {
+  background: #111d2d;
+  border: 1px solid #26364c;
+  border-radius: 10px;
+  padding: 16px;
+  min-width: 0;
+}
+
+.egress-stat-icon {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  width: 34px;
+  height: 34px;
+  border-radius: 8px;
+  background: #1c3555;
+  color: #60a5fa;
+  margin-bottom: 13px;
+}
+
+.egress-stat-label {
+  display: block;
+  font-size: 12px;
+  color: #94a3b8;
+  margin-bottom: 7px;
+}
+
+.egress-stat-card strong {
+  display: block;
+  font-size: 23px;
+  color: #f1f5f9;
+  overflow-wrap: anywhere;
+}
+
+.egress-stat-card small {
+  display: block;
+  color: #75869d;
+  font-size: 11px;
+  margin-top: 7px;
+}
+
+.egress-stat-card .egress-decision {
+  color: #fbbf24;
+  font-size: 22px;
+}
+
+.egress-stat-card .egress-decision.allow,
+.egress-stat-card .egress-safe {
+  color: #4ade80;
+}
+
+.egress-stat-card .egress-decision.block {
+  color: #fb7185;
+}
+
+.egress-stat-card .egress-unknown {
+  color: #fbbf24;
+}
+
+.egress-grid {
+  display: grid;
+  grid-template-columns: minmax(0, 1fr) minmax(0, 1fr);
+  gap: 16px;
+  margin-bottom: 16px;
+}
+
+.egress-panel {
+  background: #111d2d;
+  border: 1px solid #26364c;
+  border-radius: 10px;
+  padding: 18px;
+  min-width: 0;
+}
+
+.egress-panel-heading {
+  display: flex;
+  align-items: flex-start;
+  justify-content: space-between;
+  gap: 12px;
+  margin-bottom: 18px;
+}
+
+.egress-panel-heading h2 {
+  font-size: 15px;
+  color: #f1f5f9;
+  margin: 0 0 5px;
+}
+
+.egress-panel-heading p {
+  font-size: 11px;
+  color: #8493a9;
+  margin: 0;
+  line-height: 1.5;
+}
+
+.egress-badge,
+.egress-code-label,
+.egress-audit-count {
+  display: inline-flex;
+  align-items: center;
+  gap: 5px;
+  border-radius: 20px;
+  padding: 5px 9px;
+  font-size: 10px;
+  font-weight: 700;
+  white-space: nowrap;
+}
+
+.egress-badge.allow {
+  background: #123728;
+  color: #4ade80;
+}
+
+.egress-badge.block {
+  background: #451e2a;
+  color: #fb7185;
+}
+
+.egress-code-label {
+  border-radius: 5px;
+  background: #24364d;
+  color: #93c5fd;
+}
+
+.egress-audit-count {
+  background: #24364d;
+  color: #bfdbfe;
+}
+
+.egress-details {
+  display: grid;
+  grid-template-columns: 1fr 1fr;
+  gap: 16px 18px;
+}
+
+.egress-details > div {
+  min-width: 0;
+}
+
+.egress-details span {
+  display: block;
+  color: #8493a9;
+  font-size: 11px;
+  margin-bottom: 6px;
+}
+
+.egress-details strong {
+  display: block;
+  color: #e2e8f0;
+  font-size: 12px;
+  font-weight: 600;
+  overflow-wrap: anywhere;
+  line-height: 1.5;
+}
+
+.egress-mono {
+  font-family: Consolas, Monaco, monospace;
+  overflow-wrap: anywhere;
+}
+
+.egress-field-section {
+  margin-top: 21px;
+}
+
+.egress-field-section h3 {
+  font-size: 12px;
+  color: #cbd5e1;
+  margin: 0 0 10px;
+}
+
+.egress-tags {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 7px;
+}
+
+.egress-tag {
+  display: inline-flex;
+  align-items: center;
+  gap: 5px;
+  border-radius: 5px;
+  padding: 6px 9px;
+  font-size: 11px;
+  font-weight: 600;
+}
+
+.egress-tag.approved {
+  background: #15382d;
+  color: #4ade80;
+}
+
+.egress-tag.blocked {
+  background: #45232b;
+  color: #fb7185;
+}
+
+.egress-muted {
+  font-size: 11px;
+  color: #8493a9;
+}
+
+.egress-hash {
+  margin-top: 22px;
+  padding: 12px;
+  background: #0b1422;
+  border: 1px solid #26364c;
+  border-radius: 7px;
+}
+
+.egress-hash-title {
+  display: flex;
+  align-items: center;
+  gap: 7px;
+  font-size: 11px;
+  color: #93c5fd;
+  margin-bottom: 9px;
+  font-weight: 600;
+}
+
+.egress-hash code {
+  display: block;
+  color: #a5b4fc;
+  font-size: 10px;
+  line-height: 1.7;
+  overflow-wrap: anywhere;
+}
+
+.egress-code {
+  background: #091321;
+  color: #a7f3d0;
+  border: 1px solid #26364c;
+  border-radius: 8px;
+  padding: 15px;
+  height: 325px;
+  overflow: auto;
+  font-family: Consolas, Monaco, monospace;
+  font-size: 11px;
+  line-height: 1.7;
+  white-space: pre-wrap;
+  overflow-wrap: anywhere;
+  margin: 0;
+}
+
+.egress-payload-note {
+  display: flex;
+  gap: 7px;
+  align-items: flex-start;
+  color: #8493a9;
+  font-size: 10px;
+  line-height: 1.5;
+  margin-top: 11px;
+}
+
+.egress-payload-note svg {
+  flex-shrink: 0;
+  color: #60a5fa;
+}
+
+.egress-audit-panel {
+  margin-bottom: 15px;
+}
+
+.egress-table-wrap {
+  width: 100%;
+  overflow-x: auto;
+}
+
+.egress-table {
+  border-collapse: collapse;
+  width: 100%;
+  text-align: left;
+  font-size: 11px;
+  min-width: 620px;
+}
+
+.egress-table th {
+  color: #8493a9;
+  font-size: 10px;
+  text-transform: uppercase;
+  letter-spacing: 0.6px;
+  padding: 11px 10px;
+  border-bottom: 1px solid #2b3b50;
+}
+
+.egress-table td {
+  color: #cbd5e1;
+  padding: 12px 10px;
+  border-bottom: 1px solid #243348;
+  max-width: 250px;
+  overflow-wrap: anywhere;
+}
+
+.egress-table tr:last-child td {
+  border-bottom: none;
+}
+
+.egress-table-status {
+  display: inline-block;
+  color: #cbd5e1;
+  background: #29374b;
+  padding: 4px 7px;
+  border-radius: 5px;
+  font-size: 10px;
+  font-weight: 700;
+}
+
+.egress-table-status.success {
+  background: #15382d;
+  color: #4ade80;
+}
+
+.egress-table-status.danger {
+  background: #45232b;
+  color: #fb7185;
+}
+
+.egress-empty {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  flex-direction: column;
+  gap: 9px;
+  min-height: 110px;
+  color: #8493a9;
+  text-align: center;
+  font-size: 12px;
+}
+
+.egress-empty p {
+  margin: 0;
+}
+
+.egress-footer-note {
+  display: flex;
+  align-items: flex-start;
+  gap: 8px;
+  color: #8493a9;
+  font-size: 11px;
+  line-height: 1.6;
+  padding: 5px 2px;
+}
+
+.egress-footer-note svg {
+  color: #60a5fa;
+  flex-shrink: 0;
+}
+
+@media (max-width: 1100px) {
+  .egress-stats {
+    grid-template-columns: repeat(2, minmax(0, 1fr));
+  }
+
+  .egress-grid {
+    grid-template-columns: 1fr;
+  }
+}
+
+@media (max-width: 600px) {
+  .egress-header {
+    flex-direction: column;
+  }
+
+  .egress-updated {
+    display: none;
+  }
+
+  .egress-stats {
+    grid-template-columns: 1fr 1fr;
+    gap: 9px;
+  }
+
+  .egress-stat-card {
+    padding: 12px;
+  }
+
+  .egress-stat-card strong {
+    font-size: 19px;
+  }
+
+  .egress-details {
+    grid-template-columns: 1fr;
+  }
+
+  .egress-panel {
+    padding: 14px;
+  }
+}

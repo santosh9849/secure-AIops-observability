@@ -1,4 +1,3 @@
-
 import { NavLink } from 'react-router-dom'
 import {
   Activity,
@@ -9,6 +8,7 @@ import {
   AlertTriangle,
   BrainCircuit,
   ClipboardList,
+  FileCheck2,
   Settings,
   LogOut,
   Radio,
@@ -22,6 +22,7 @@ const navigation = [
   { name: 'Incidents', path: '/incidents', icon: AlertTriangle },
   { name: 'AI Insights', path: '/ai-insights', icon: BrainCircuit },
   { name: 'Audit Logs', path: '/audit-logs', icon: ClipboardList },
+  { name: 'Egress Proof', path: '/egress-proof', icon: FileCheck2 },
 ]
 
 function Sidebar() {
@@ -65,10 +66,12 @@ function Sidebar() {
             <Radio size={17} />
             <span>Collector Status</span>
           </div>
+
           <div className="collector-status-value">
             <span className="status-indicator"></span>
             Monitoring active
           </div>
+
           <p>Local agent connection status</p>
         </div>
 

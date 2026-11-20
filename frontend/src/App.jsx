@@ -1,4 +1,3 @@
-
 import { BrowserRouter, Routes, Route, Navigate } from 'react-router-dom'
 
 import Sidebar from './components/Sidebar'
@@ -12,6 +11,7 @@ import Security from './pages/Security'
 import Incidents from './pages/Incidents'
 import AIInsights from './pages/AIInsights'
 import AuditLogs from './pages/AuditLogs'
+import EgressProof from './pages/EgressProof'
 
 import './App.css'
 
@@ -32,6 +32,7 @@ function Layout() {
             <Route path="/incidents" element={<Incidents />} />
             <Route path="/ai-insights" element={<AIInsights />} />
             <Route path="/audit-logs" element={<AuditLogs />} />
+            <Route path="/egress-proof" element={<EgressProof />} />
           </Routes>
         </div>
       </main>
@@ -44,9 +45,7 @@ function App() {
     <BrowserRouter>
       <Routes>
         <Route path="/login" element={<Login />} />
-
         <Route path="/*" element={<Layout />} />
-
         <Route path="/" element={<Navigate to="/dashboard" replace />} />
       </Routes>
     </BrowserRouter>

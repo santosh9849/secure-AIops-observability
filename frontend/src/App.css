@@ -2615,5 +2615,248 @@
     padding: 24px;
   }
 }
+/* AI Insights - metadata formatting */
+.ai-insights-page .ai-insight-metadata {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: center;
+  gap: 8px 18px;
+  margin: 10px 0;
+  color: #94a3b8;
+  font-size: 12px;
+  line-height: 1.6;
+}
 
+.ai-insights-page .ai-insight-metadata span {
+  display: inline-flex;
+  gap: 4px;
+  align-items: baseline;
+}
 
+.ai-insights-page .ai-insight-metadata strong {
+  color: #e2e8f0;
+}
+
+.ai-insights-page .ai-insight-item {
+  min-width: 0;
+  align-items: flex-start;
+}
+
+.ai-insights-page .ai-insight-details {
+  flex: 1;
+  min-width: 0;
+}
+
+.ai-insights-page .ai-insight-title {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: center;
+  gap: 8px;
+}
+
+.ai-insights-page .ai-summary-grid {
+  grid-template-columns: repeat(auto-fit, minmax(180px, 1fr));
+}
+
+.ai-insights-page .ai-evidence-list {
+  margin-top: 10px;
+  padding-left: 20px;
+  color: #cbd5e1;
+}
+
+.ai-insights-page .ai-evidence-list li {
+  margin-bottom: 7px;
+  font-size: 12px;
+  line-height: 1.5;
+}
+
+.ai-insights-page .ai-command-preview {
+  display: block;
+  margin-top: 8px;
+  padding: 12px;
+  background: #091321;
+  border: 1px solid #26364c;
+  border-radius: 7px;
+  color: #a7f3d0;
+  font-size: 11px;
+  white-space: pre-wrap;
+  overflow-wrap: anywhere;
+}
+
+.ai-insights-page .ai-empty-state {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  gap: 10px;
+  padding: 28px 15px;
+  color: #94a3b8;
+  text-align: center;
+  font-size: 13px;
+}
+
+.ai-refresh-spinning {
+  animation: ai-refresh-spin 1s linear infinite;
+}
+
+@keyframes ai-refresh-spin {
+  to {
+    transform: rotate(360deg);
+  }
+}
+
+.incident-action-button,
+.incident-analysis-button {
+  display: inline-flex;
+  align-items: center;
+  gap: 7px;
+  padding: 9px 13px;
+  border-radius: 7px;
+  cursor: pointer;
+  font-size: 12px;
+  font-weight: 600;
+}
+
+.incident-action-button {
+  color: #e2e8f0;
+  background: #172235;
+  border: 1px solid #334155;
+}
+
+.incident-analysis-button {
+  color: white;
+  background: #1d4ed8;
+  border: 1px solid #2563eb;
+}
+
+.incident-action-button:disabled,
+.incident-analysis-button:disabled {
+  opacity: 0.55;
+  cursor: not-allowed;
+}
+
+.incident-feedback {
+  display: flex;
+  align-items: center;
+  gap: 9px;
+  padding: 12px 14px;
+  margin: 12px 0;
+  border-radius: 8px;
+  font-size: 12px;
+}
+
+.incident-feedback.success {
+  background: #123728;
+  border: 1px solid #166534;
+  color: #86efac;
+}
+
+.incident-feedback.error {
+  background: #451e2a;
+  border: 1px solid #9f1239;
+  color: #fda4af;
+}
+
+.incident-empty {
+  min-height: 130px;
+  display: flex;
+  flex-direction: column;
+  gap: 9px;
+  align-items: center;
+  justify-content: center;
+  color: #94a3b8;
+  font-size: 12px;
+  text-align: center;
+}
+
+.incident-empty p {
+  margin: 0;
+}
+
+.incident-extra-details {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 7px 16px;
+  margin: 11px 0;
+  color: #94a3b8;
+  font-size: 11px;
+  line-height: 1.6;
+}
+
+.incident-extra-details strong {
+  color: #e2e8f0;
+}
+
+.incident-evidence {
+  margin-top: 10px;
+  color: #94a3b8;
+  font-size: 12px;
+}
+
+.incident-evidence summary {
+  display: inline-flex;
+  align-items: center;
+  gap: 6px;
+  cursor: pointer;
+}
+
+.incident-evidence ul {
+  margin-top: 9px;
+  padding-left: 22px;
+  color: #cbd5e1;
+}
+
+.incident-evidence li {
+  margin-bottom: 6px;
+  line-height: 1.5;
+}
+
+.incident-controls {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: center;
+  gap: 8px;
+  margin-top: 12px;
+}
+
+.incident-controls button {
+  display: inline-flex;
+  align-items: center;
+  gap: 6px;
+  border: 1px solid #334155;
+  border-radius: 6px;
+  background: #172235;
+  color: #cbd5e1;
+  padding: 7px 10px;
+  cursor: pointer;
+  font-size: 11px;
+  font-weight: 600;
+}
+
+.incident-controls button:hover {
+  background: #263b56;
+}
+
+.incident-controls button:disabled {
+  opacity: 0.5;
+  cursor: not-allowed;
+}
+
+.incident-controls span {
+  color: #94a3b8;
+  font-size: 11px;
+}
+.login-spinner {
+  animation: login-spin 1s linear infinite;
+}
+
+@keyframes login-spin {
+  to {
+    transform: rotate(360deg);
+  }
+}
+
+.login-submit:disabled {
+  opacity: 0.65;
+  cursor: not-allowed;
+}

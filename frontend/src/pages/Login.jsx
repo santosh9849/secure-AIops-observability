@@ -9,7 +9,10 @@ import {
   LockKeyhole,
   Mail,
   ArrowRight,
+  Loader2,
 } from 'lucide-react'
+
+import { loginUser } from '../services/api'
 
 function Login() {
   const navigate = useNavigate()
@@ -18,21 +21,42 @@ function Login() {
   const [password, setPassword] = useState('')
   const [showPassword, setShowPassword] = useState(false)
   const [error, setError] = useState('')
-  const [message, setMessage] = useState('')
+  const [loading, setLoading] = useState(false)
 
-  function handleSubmit(e) {
+  async function handleSubmit(e) {
     e.preventDefault()
     setError('')
-    setMessage('')
 
-    if (!email.trim() || !password.trim()) {
+    if (!email.trim() || !password) {
       setError('Please enter both email and password.')
       return
     }
 
-    setMessage(
-      'Login interface is ready. Backend authentication will be connected next.'
-    )
+    setLoading(true)
+
+    try {
+      const result = await loginUser(email.trim(), password)
+
+      if (!result.access_token) {
+        throw new Error('The server did not return an access token.')
+      }
+
+      // Keep the token for this browser session.
+      sessionStorage.setItem('access_token', result.access_token)
+      sessionStorage.setItem('user_email', result.email || email.trim())
+
+      navigate('/dashboard', { replace: true })
+    } catch (err) {
+      const detail = err.response?.data?.detail
+
+      setError(
+        typeof detail === 'string'
+          ? detail
+          : err.message || 'Login failed. Please try again.'
+      )
+    } finally {
+      setLoading(false)
+    }
   }
 
   return (
@@ -61,12 +85,16 @@ function Login() {
 
           <div className="login-input-wrapper">
             <Mail size={18} />
+
             <input
               id="email"
               type="email"
               placeholder="Enter your email"
               value={email}
               onChange={(e) => setEmail(e.target.value)}
+              autoComplete="username"
+              required
+              disabled={loading}
             />
           </div>
 
@@ -74,12 +102,16 @@ function Login() {
 
           <div className="login-input-wrapper">
             <LockKeyhole size={18} />
+
             <input
               id="password"
               type={showPassword ? 'text' : 'password'}
               placeholder="Enter your password"
               value={password}
               onChange={(e) => setPassword(e.target.value)}
+              autoComplete="current-password"
+              required
+              disabled={loading}
             />
 
             <button
@@ -87,17 +119,34 @@ function Login() {
               className="password-toggle"
               onClick={() => setShowPassword(!showPassword)}
               aria-label={showPassword ? 'Hide password' : 'Show password'}
+              disabled={loading}
             >
               {showPassword ? <EyeOff size={18} /> : <Eye size={18} />}
             </button>
           </div>
 
-          {error && <p className="login-error">{error}</p>}
-          {message && <p className="login-message">{message}</p>}
+          {error && (
+            <p className="login-error" role="alert">
+              {error}
+            </p>
+          )}
 
-          <button type="submit" className="login-submit">
-            Sign In
-            <ArrowRight size={18} />
+          <button
+            type="submit"
+            className="login-submit"
+            disabled={loading}
+          >
+            {loading ? (
+              <>
+                <Loader2 size={18} className="login-spinner" />
+                Signing in...
+              </>
+            ) : (
+              <>
+                Sign In
+                <ArrowRight size={18} />
+              </>
+            )}
           </button>
         </form>
 
