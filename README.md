@@ -4,7 +4,7 @@
 
 **CICADA 2026 – 24-Hour Hackathon**
 
-SentinelOps AI is a secure, AI-powered observability platform designed to monitor enterprise infrastructure, applications, networks, and security events while protecting sensitive operational data.
+A secure, AI-powered observability platform that monitors enterprise infrastructure, applications, networks, and security events while protecting sensitive operational data.
 
 ---
 
@@ -12,27 +12,26 @@ SentinelOps AI is a secure, AI-powered observability platform designed to monito
 
 Organizations need to monitor their infrastructure, applications, networks, and security events without exposing sensitive operational data.
 
-Traditional monitoring systems may transfer raw logs, credentials, and detailed telemetry to centralized platforms. This can create privacy and security risks. They can also generate too many alerts, making it difficult to identify the actual causes of system failures.
+Traditional monitoring systems may transfer raw logs, credentials, and detailed telemetry to centralized platforms. This creates privacy and security risks. They can also generate too many alerts, making it difficult to identify the actual causes of system failures.
 
 ### Our Solution
 
-SentinelOps AI uses a two-tier architecture consisting of:
+SentinelOps AI introduces a two-tier observability architecture consisting of a local collector and a centralized SaaS platform.
 
-- **Tier 1 – Local Collector:** Collects and processes telemetry locally, filters sensitive information, and sends only approved metadata.
-- **Tier 2 – Centralized SaaS Platform:** Receives approved metadata, detects anomalies, correlates events, identifies possible root causes, and displays insights through a dashboard.
+The local collector gathers and processes telemetry, filters sensitive information, redacts secrets, and sends only approved metadata to the centralized platform.
 
-Our goal is to provide secure, intelligent, and privacy-aware observability.
+The SaaS platform uses AIOps techniques to detect anomalies, correlate incidents, and generate explainable operational recommendations.
 
 ## 2. Project Objectives
 
 - Protect sensitive operational data through local processing.
 - Monitor infrastructure, applications, networks, and security events.
-- Detect unusual system behaviour using AI/ML techniques.
+- Detect anomalies using historical baselines and statistical techniques.
 - Reduce alert fatigue through event correlation.
-- Provide explainable recommendations.
-- Support multiple customer environments.
+- Provide explainable recommendations for system administrators.
+- Support multiple collectors and customer environments.
 - Maintain reliable data delivery during network outages.
-- Provide a centralized monitoring dashboard.
+- Provide a centralized real-time observability dashboard.
 
 ## 3. System Architecture
 
@@ -49,8 +48,8 @@ Responsibilities:
 - Redact sensitive information.
 - Apply metadata allow-list policies.
 - Perform local analysis.
-- Maintain egress audit records.
-- Buffer approved metadata during connectivity outages.
+- Maintain an egress audit or proof log.
+- Buffer approved metadata during SaaS outages.
 
 ### Tier 2: Centralized SaaS Platform
 
@@ -60,16 +59,16 @@ Responsibilities:
 - Authenticate collectors.
 - Enforce tenant-level data separation.
 - Store telemetry and incident records.
-- Detect anomalies using AI/ML.
-- Correlate related events.
-- Generate alerts and recommendations.
-- Display information through a monitoring dashboard.
+- Detect anomalies.
+- Correlate related alerts.
+- Generate explainable recommendations.
+- Provide real-time dashboards and alerts.
 
 ### Data Flow
 
 **Collect → Filter → Redact → Aggregate → Analyze Locally → Apply Data Policy → Transmit Approved Metadata → SaaS Analytics → Dashboard and Recommendations**
 
-Raw logs, passwords, tokens, and other sensitive information should remain local by default.
+Raw logs, passwords, tokens, and sensitive information should remain local by default.
 
 ## 4. Key Features
 
@@ -77,14 +76,14 @@ Raw logs, passwords, tokens, and other sensitive information should remain local
 |---|---|
 | Local Telemetry Collector | Collects infrastructure and network metrics |
 | Privacy Engine | Filters and redacts sensitive information |
-| Metadata-Only Transmission | Sends approved metadata to the SaaS platform |
-| Egress Proof Panel | Displays information transmitted outside the local environment |
+| Metadata-Only Transmission | Sends approved metadata to SaaS |
+| Egress Proof Panel | Shows information transmitted outside the local environment |
 | Real-Time Dashboard | Displays infrastructure health |
 | Four Health States | Excellent, Good, Fair, and Poor |
 | Anomaly Detection | Identifies unusual system behaviour |
 | Event Correlation | Groups related alerts into incidents |
 | Root Cause Analysis | Identifies possible causes of incidents |
-| AI Recommendations | Suggests possible actions and solutions |
+| AI Recommendations | Suggests possible causes and solutions |
 | Local Buffering | Stores approved metadata during connectivity outages |
 | Multi-Tenant Support | Separates customer environments |
 
@@ -132,7 +131,12 @@ secure-AIops-observability/
 │   └── Architecture and API documentation
 │
 ├── frontend/
-│   └── React monitoring dashboard
+│   ├── public/
+│   └── src/
+│       ├── assets/
+│       ├── components/
+│       ├── pages/
+│       └── services/
 │
 ├── tests/
 │   └── Integration and performance tests
@@ -144,7 +148,7 @@ secure-AIops-observability/
 
 ## 7. Team Responsibilities
 
-The project is divided into four development modules.
+The project is divided into four independent development modules.
 
 ### Member 1 – Local Collector Engineer
 
@@ -157,12 +161,12 @@ Responsibilities:
 - Develop the Python telemetry collector.
 - Collect CPU, memory, and disk usage.
 - Monitor network latency and packet loss.
-- Process application and security events.
+- Process application and security logs.
 - Integrate simulated telemetry.
 - Implement local buffering and retry mechanisms.
 - Ensure telemetry is processed locally.
 
-**Expected Deliverable:** A Python collector that gathers and processes telemetry inside the customer environment.
+**Expected Deliverable:** A working Python collector that gathers and processes telemetry inside the customer environment.
 
 ### Member 2 – Backend and Security Engineer
 
@@ -181,7 +185,7 @@ Responsibilities:
 - Implement duplicate payload prevention.
 - Maintain egress audit records.
 
-**Expected Deliverable:** A backend supporting metadata ingestion, authentication, and multi-tenant storage.
+**Expected Deliverable:** A secure backend supporting metadata ingestion, authentication, and multi-tenant storage.
 
 ### Member 3 – Frontend Engineer
 
@@ -219,11 +223,11 @@ Responsibilities:
 - Display contributing signals and confidence scores.
 - Integrate AIOps results with the backend and dashboard.
 
-**Expected Deliverable:** An analytics engine capable of detecting anomalies, correlating incidents, and recommending actions.
+**Expected Deliverable:** An intelligent analytics engine capable of detecting anomalies, correlating incidents, and recommending actions.
 
 ### Shared Responsibilities
 
-All team members are responsible for:
+All four members are responsible for:
 
 - Following secure coding practices.
 - Maintaining code documentation.
@@ -241,7 +245,7 @@ The project uses separate development branches to support parallel development.
 | `main` | Stable integrated project |
 | `collector` | Python telemetry collector |
 | `backend` | Backend and security |
-| `frontend` | React monitoring dashboard |
+| `frontend` | Monitoring dashboard |
 | `aiops` | Anomaly detection and recommendations |
 
 ### Collaboration Workflow
@@ -255,8 +259,6 @@ The project uses separate development branches to support parallel development.
 7. Keep `main` stable and functional.
 
 ## 9. Data Privacy and Security
-
-Security and privacy are important design principles of this project.
 
 ### Data That Stays Local
 
@@ -326,13 +328,13 @@ Automated remediation will initially be simulated or restricted to a safe test e
 git clone https://github.com/santosh9849/secure-AIops-observability.git
 ```
 
-### Step 2: Open the Project Folder
+### Step 2: Open the Project
 
 ```bash
 cd secure-AIops-observability
 ```
 
-### Step 3: Navigate to the Frontend
+### Step 3: Navigate to Frontend
 
 ```bash
 cd frontend
@@ -344,7 +346,7 @@ cd frontend
 npm install
 ```
 
-### Step 5: Start the Development Server
+### Step 5: Start Development Server
 
 ```bash
 npm run dev
