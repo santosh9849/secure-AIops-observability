@@ -115,7 +115,7 @@ function AIInsights() {
             INTELLIGENT OPERATIONS
           </span>
 
-          <h2>AI Insights</h2>
+          <h2>AI Analysis Overview</h2>
           <p>
             Actual incidents, root-cause information and recommendations
             from the AIOps engine.

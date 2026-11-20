@@ -296,7 +296,7 @@ function Dashboard() {
             SYSTEM MONITORING
           </span>
 
-          <h2>Infrastructure Overview</h2>
+          <h2>Dashboard Overview</h2>
 
           <p>
             Live infrastructure monitoring from connected machines.
