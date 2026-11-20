@@ -1,6 +1,6 @@
 import time
 import uuid
-from fastapi import FastAPI
+from fastapi import FastAPI,HTTPException
 from schemas.aiops_output import (
     AnalyzeBatchRequest,
     AnalyzeBatchResponse,
@@ -37,7 +37,14 @@ def health_check():
 @app.post("/analyze", response_model=AnalyzeBatchResponse)
 def analyze_telemetry(request: AnalyzeBatchRequest):
     start_time = time.perf_counter()
-
+    
+        # Validate tenant ownership
+    if any(event.tenant_id != request.tenant_id for event in request.events):
+        raise HTTPException(
+            status_code=400,
+            detail="All telemetry events must belong to the request tenant."
+        )
+    
     # Optional baseline seeding from backend history
     for key, values in (request.historical_baseline or {}).items():
         if ":" in key:

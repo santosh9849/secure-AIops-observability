@@ -10,12 +10,20 @@ class EventCorrelator:
         if not anomalies:
             return []
 
-        # Deduplicate signals referencing the exact same event_id (keep highest score)
-        deduped_map = {}
-        for a in anomalies:
-            if a.event_id not in deduped_map or a.anomaly_score > deduped_map[a.event_id].anomaly_score:
-                deduped_map[a.event_id] = a
 
+                # Deduplicate by tenant and event ID
+        deduped_map = {}
+
+        for a in anomalies:
+            key = (a.tenant_id, a.event_id)
+
+            if (
+                key not in deduped_map
+                or a.anomaly_score > deduped_map[key].anomaly_score
+            ):
+                deduped_map[key] = a
+
+    
         # Sort strictly by UTC event_timestamp_utc to guarantee out-of-order resilience
         sorted_signals = sorted(deduped_map.values(), key=lambda x: x.event_timestamp_utc)
 
