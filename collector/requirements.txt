@@ -1,1 +1,8 @@
+integration
 psutil>=6.0.0
+fastapi
+uvicorn
+psutil
+httpx
+pydantic
+main
